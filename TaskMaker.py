@@ -324,8 +324,8 @@ class EditExperiment(tk.Frame):
 		self.sidebar.pack(fill = "y", side = "right")
 
 		# This contains the interactive section for setup of the experiment
-		self.contentframe = tk.Frame(self)
-		pack_task(controller.experiment,self.contentframe,None)
+		self.contentframe = VerticalScrolledFrame(self)
+		pack_task(controller.experiment,self.contentframe.interior,None)
 		self.contentframe.pack(fill = "both", pady=10, side = "left",expand=True)
 
 	def start_experiment(self, controller):
@@ -365,7 +365,6 @@ class ExperimentRunning(tk.Frame):
 		textscroller.pack(side="left", fill="y")
 		textscroller.config(command=self.stdtext.yview)
 		self.stdtext.config(yscrollcommand=textscroller.set)
-
 
 		self.contentframe.pack(fill = "both", side = "left", expand=True)
 		sys.stdout = StdoutRedirector(self.stdtext)
