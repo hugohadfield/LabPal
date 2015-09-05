@@ -4,6 +4,7 @@ import tkSimpleDialog
 from TaskMaster import *
 from SimpleCV import Camera
 import sys
+from PIL import ImageTk
 
 TITLE_FONT = ("Helvetica", 22, "bold")
 BODY_FONT = ("Comic Sans", 14)
@@ -154,8 +155,8 @@ class CameraMakerDialog(tkSimpleDialog.Dialog):
 
 	def body(self, master):
 
-		tk.Label(master, text="New Snapshot Name:").grid(row=0)
-		tk.Label(master, text="Select Camera Number:").grid(row=1)
+		tk.Label(master, text="New Snapshot Name:", font = BODY_FONT).grid(row=0)
+		tk.Label(master, text="Select Camera Number:", font = BODY_FONT).grid(row=1)
 
 		self.datavar = tk.IntVar(master)
 		camlist = scan_cameras()
@@ -169,6 +170,8 @@ class CameraMakerDialog(tkSimpleDialog.Dialog):
 
 		self.nameentry.grid(row=0, column=1)
 		self.dataentry.grid(row=1, column=1)
+		button1 = tk.Button(self, text = "preview", font = BODY_FONT, command = self.preview)
+		button1.pack()
 		return self.nameentry # initial focus
 
 	def apply(self):
@@ -177,40 +180,13 @@ class CameraMakerDialog(tkSimpleDialog.Dialog):
 		self.camnumb = self.datavar.get()
 		self.finishedtask = CameraSnapshot(self.name, 0, Camera(self.camnumb))
 
+	def preview(self):
+		LiveCameraDialog(Camera(self.datavar.get()),self)
 
 
-class ImageTaskMakerDialog(tkSimpleDialog.Dialog):
-
-	def __init__(self, partask, *args,**kwargs):
-		self.partask = partask # create a local copy of parent task
-		self.finishedtask = None
-		tkSimpleDialog.Dialog.__init__(self, *args,**kwargs)
-
-	def body(self, master):
-
-		namesinscope = [ task.name for task in self.partask.tasks ]
-		tk.Label(master, text="New task name:").grid(row=0)
-		tk.Label(master, text="New task function:").grid(row=1)
-		tk.Label(master, text="Get data from:").grid(row=2)
-
-		self.datavar = tk.StringVar(master)
-		self.datavar.set(namesinscope[0])
-
-		self.nameentry = tk.Entry(master)
-		self.dataentry = tk.OptionMenu(master, self.datavar, *namesinscope)
-
-		self.nameentry.grid(row=0, column=1)
-		self.dataentry.grid(row=2, column=1)
-		return self.nameentry # initial focus
-
-	def apply(self):
-		self.name = self.nameentry.get()
-		self.datasource = self.datavar.get()
-		self.finishedtask = ImageTask(self.name, 0, self.datasource, IMT_sumbox, [0,0],[100,100])
 
 def lol():
 	pass
-
 
 class NewTaskDialog(tkSimpleDialog.Dialog):
 
@@ -224,12 +200,12 @@ class NewTaskDialog(tkSimpleDialog.Dialog):
 		vsf = VerticalScrolledFrame(contframe)
 		buttons = [ tk.Button(vsf.interior, text='Group', font=BODY_FONT, command=self.MakeLoop),
 					tk.Button(vsf.interior, text='Camera Snapshot', font=BODY_FONT, command=self.MakeCamera),
-					tk.Button(vsf.interior, text='Marker Tracker', font=BODY_FONT, command=lol),
-					tk.Button(vsf.interior, text='Read Screen', font=BODY_FONT, command=lol),
-					tk.Button(vsf.interior, text='Read Scale', font=BODY_FONT, command=lol),
-					tk.Button(vsf.interior, text='Read Arduino Temperature', font=BODY_FONT, command=lol),
-					tk.Button(vsf.interior, text='User Prompt', font=BODY_FONT, command=lol),
-					tk.Button(vsf.interior, text='User Input', font=BODY_FONT, command=lol) ]
+					tk.Button(vsf.interior, text='Marker Tracker', font=BODY_FONT, command=self.MakeMarkerTracker),
+					tk.Button(vsf.interior, text='Read Screen', font=BODY_FONT, command=self.MakeScreenReader),
+					tk.Button(vsf.interior, text='Read Scale', font=BODY_FONT, command=self.MakeScaleReader),
+					tk.Button(vsf.interior, text='Read Arduino Temperature', font=BODY_FONT, command=self.MakeArduinoReader),
+					tk.Button(vsf.interior, text='User Prompt', font=BODY_FONT, command=self.MakeUserPrompt),
+					tk.Button(vsf.interior, text='User Input', font=BODY_FONT, command=self.MakeUserInput) ]
 		for but in buttons:
 			but.pack(fill = "x", padx = 10, pady = 2)
 		vsf.pack(fill = "both")
@@ -262,6 +238,42 @@ class NewTaskDialog(tkSimpleDialog.Dialog):
 		self.finishedtask = md.finishedtask
 		self.cancel()
 
+	def MakeMarkerTracker(self):
+		self.parent.focus_set()
+		md = LoopMakerDialog(self.partask,self.master)
+		self.finishedtask = md.finishedtask
+		self.cancel()
+
+	def MakeScreenReader(self):
+		self.parent.focus_set()
+		md = LoopMakerDialog(self.partask,self.master)
+		self.finishedtask = md.finishedtask
+		self.cancel()
+
+	def MakeScaleReader(self):
+		self.parent.focus_set()
+		md = LoopMakerDialog(self.partask,self.master)
+		self.finishedtask = md.finishedtask
+		self.cancel()
+
+	def MakeArduinoReader(self):
+		self.parent.focus_set()
+		md = LoopMakerDialog(self.partask,self.master)
+		self.finishedtask = md.finishedtask
+		self.cancel()
+
+	def MakeUserPrompt(self):
+		self.parent.focus_set()
+		md = LoopMakerDialog(self.partask,self.master)
+		self.finishedtask = md.finishedtask
+		self.cancel()
+
+	def MakeUserInput(self):
+		self.parent.focus_set()
+		md = LoopMakerDialog(self.partask,self.master)
+		self.finishedtask = md.finishedtask
+		self.cancel()
+
 
 def runNewTaskMaker(looptask, master):
 	md = NewTaskDialog(looptask,master)
@@ -271,20 +283,78 @@ def runNewTaskMaker(looptask, master):
 
 
 
-# def new_task(looptask,yesubframe):
-	# top = tkSimpleDialog()
-	# top.geometry("%dx%d%+d%+d" % (600, 200, 250, 125))
-	# vsf = VerticalScrolledFrame()
-	# buttons = [ tk.Button(vsf, text='Group',  command=lambda: pass),
-				# tk.Button(vsf, text='Camera Snapshot', command=lambda: ),
-				# tk.Button(vsf, text='Marker Tracker', command=lambda: ),
-				# tk.Button(vsf, text='Read Screen', command=lambda: ),
-				# tk.Button(vsf, text='Read Scale', command=lambda: ),
-				# tk.Button(vsf, text='Read Arduino Temperature', command=lambda: ),
-				# tk.Button(vsf, text='User Prompt', command=lambda: ),
-				# tk.Button(vsf, text='User Input', command=lambda: ) ]
+
+
+
+
+class ImageTaskMakerDialog(tkSimpleDialog.Dialog):
+
+	def __init__(self, partask, *args,**kwargs):
+		self.partask = partask # create a local copy of parent task
+		self.finishedtask = None
+		tkSimpleDialog.Dialog.__init__(self, *args,**kwargs)
+
+	def body(self, master):
+
+		namesinscope = self.partask.list_imageout()
+		tk.Label(master, text="New task name:").grid(row=0)
+		tk.Label(master, text="New task function:").grid(row=1)
+		tk.Label(master, text="Get data from:").grid(row=2)
+
+		self.datavar = tk.StringVar(master)
+		self.datavar.set(namesinscope[0])
+
+		self.nameentry = tk.Entry(master)
+		self.dataentry = tk.OptionMenu(master, self.datavar, *namesinscope)
+
+		self.nameentry.grid(row=0, column=1)
+		self.dataentry.grid(row=2, column=1)
+		return self.nameentry # initial focus
+
+	def apply(self):
+		self.name = self.nameentry.get()
+		self.datasource = self.datavar.get()
+		self.finishedtask = ImageTask(self.name, 0, self.datasource, IMT_sumbox, [0,0],[100,100])
+
+
+
+
+
+
+def pack_cam_image(master, parentdialog):
+	for s in master.pack_slaves():
+		s.destroy()
+	camim = parentdialog.camera.getImage()
+	sf = 300/float(camim.height)
+	photo = ImageTk.PhotoImage(camim.scale(sf).getPIL()) 
+	label = tk.Label(master, image=photo) 
+	label.camim = photo # keep a reference! 
+	label.pack() #show the image
+	timerid = master.after(100, lambda:pack_cam_image(master, parentdialog) )
+
+class LiveCameraDialog(tkSimpleDialog.Dialog):
+
+	def __init__(self, camera, *args,**kwargs):
+		self.camera = camera
+		tkSimpleDialog.Dialog.__init__(self, *args,**kwargs)
+
+	def body(self, master):
+		contframe = tk.Frame(self)
+		
+		timerid = self.after(100, lambda:pack_cam_image(contframe, self) )
+
+		contframe.pack(fill = "both")
+
+	def buttonbox(self):
+		box = tk.Frame(self)
+		w = tk.Button(box, text="Cancel", font = BODY_FONT, width=10, command=self.cancel)
+		w.pack(padx=5, pady=5)
+		self.bind("<Escape>", self.cancel)
+		box.pack()
+
+
+
 
 if __name__ == "__main__":
-	t1 = Loop("t1", 0)
 	root = tk.Tk()
-	runNewTaskMaker(t1, root)
+	LiveCameraDialog(Camera(0),root)
