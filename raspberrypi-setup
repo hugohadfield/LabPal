@@ -10,6 +10,8 @@ cd ssocr-2.14.1/
 sudo make install
 sudo pip install svgwrite
 sudo apt-get install matchbox-keyboard
+sudo apt-get install python-imaging
+sudo apt-get install python-imaging-tk
 
 sudo nano /home/pi/.config/lxpanel/LXDE-pi/panels/panel
 At the very top of the file, in the General section, you can modify these parameters
@@ -18,4 +20,5 @@ heightwhenhidden=2
 You can replace them by 
 autohide=1
 heightwhenhidden=0
+
 
