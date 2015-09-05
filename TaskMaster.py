@@ -3,7 +3,6 @@
 
 from PIL import Image as PILimage
 from SimpleCV import *
-import pylab as plt
 from pyssocr import *
 
 import numpy as np
