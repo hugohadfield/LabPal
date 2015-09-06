@@ -241,7 +241,7 @@ class Loop(Task):
                 if not self.execloop():
                     break
         elif self.looptime == "minimal" and self.endcondition == "repeat":
-            for i in range(0,self.repeats+2):
+            for i in range(0,self.repeats+1):
                 if not self.execloop():
                     break
         elif self.looptime == "minimal" and self.endcondition == "timeout":
@@ -251,7 +251,7 @@ class Loop(Task):
                     break
 
         elif self.looptime != "minimal" and self.endcondition == "repeat":
-            for i in range(0,self.repeats+2):
+            for i in range(0,self.repeats+1):
                 retdat = run_for(self.execloop, self.looptime)
                 if not retdat[0]:
                     break
@@ -267,42 +267,6 @@ class Loop(Task):
                 if not retdat[0]:
                     break
 
-
         print "Exiting " + self.name
         self.fileobj.close()
         return
-
-if __name__ == "__main__":
-
-    from TaskMaker import *
-
-    app = MenuApp()
-    app.mainloop()
-
-    #This sets up an outer experiment
-    myexperiment = Loop("myexperiment",0 ,None,"minimal","repeat",1)
-    myexperiment.startdirec = "./"
-    myloop = Loop("myloop",0 ,None,"minimal","repeat",100)
-    myloop.add_task(CameraSnapshot("snap1", 0, Camera(1)))
-    myloop.add_task(ImageTask("readdigs",0,"snap1",IMT_readdigits,[150,78],[466,251]))
-    myexperiment.add_task(myloop)
-    thread = threading.Thread(target=myexperiment.run, args=())
-
-    
-    root = tk.Tk()
-    root.geometry("800x480")
-    contentframe = tk.Frame()
-    pack_task(myexperiment,contentframe,None)
-    contentframe.pack(side="top", fill="both", expand=True)
-    contentframe.mainloop()
-    print myexperiment.tasks
-
-    thread.start()
-
-    #p = raw_input("Press Enter to continue...")
-    #breaklock.acquire()
-    #LOOPBREAK = True
-    #breaklock.release()
-    thread.join()
-
-    sys.exit(0)

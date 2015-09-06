@@ -32,6 +32,24 @@ class LoopRepeatDialog(templateDialog):
 		self.finishedtask=Loop("tname", 0, None, looptime ,"repeat", self.repeats)
 
 
+class LoopContinuousDialog(templateDialog):
+	def __init__(self, *args,**kwargs):
+		self.finishedtask = None
+		tkSimpleDialog.Dialog.__init__(self, *args,**kwargs)
+
+	def body(self, master):
+		tk.Label(master, text="Repeat frequency (Hz):", font=BODY_FONT).grid(row=0)
+		self.frequencyentry = tk.Entry(master)
+		self.frequencyentry.insert(0, "10")
+		self.frequencyentry.grid(row=0, column=1)
+		return self.frequencyentry # initial focus
+
+	def apply(self):
+		self.frequency = float(self.frequencyentry.get())
+		looptime = 1/self.frequency
+		self.finishedtask=Loop("tname", 0, None, looptime ,"manual")
+
+
 class LoopDurationDialog(templateDialog):
 	def __init__(self, *args,**kwargs):
 		self.finishedtask = None
@@ -111,13 +129,15 @@ class LoopMakerDialog(templateDialog):
 		self.datasource = None
 		self.repeats = self.datavar.get()
 		if self.repeats == "Continuous":
-			pass
+			md = LoopContinuousDialog(self)
+			if md.finishedtask is not None:
+				self.finishedtask = md.finishedtask
+				self.finishedtask.name = self.name
 		elif self.repeats == "N Times":
 			md = LoopRepeatDialog(self)
 			if md.finishedtask is not None:
 				self.finishedtask = md.finishedtask
 				self.finishedtask.name = self.name
-			self.cancel()
 		elif self.repeats == "Set Duration":
 			md = LoopDurationDialog(self)
 			if md.finishedtask is not None:
@@ -126,4 +146,3 @@ class LoopMakerDialog(templateDialog):
 			self.cancel()
 		elif self.repeats == "None":
 			self.finishedtask = Loop(self.name,0, None, "minimal", "repeat", 0)
-			self.cancel()

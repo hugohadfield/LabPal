@@ -30,12 +30,8 @@ class MenuApp(tk.Tk):
 		container.grid_columnconfigure(0, weight=1)
 
 		# The experiment itself belongs to this window
-		myexperiment = Loop("New_Experiment",0 ,None,"minimal","repeat",1)
+		myexperiment = Loop("New_Experiment",0 ,None,"minimal","repeat",0)
 		myexperiment.startdirec = "./"
-		myloop = Loop("Myloop",0 ,None,"minimal","repeat",100)
-		myloop.add_task(CameraSnapshot("Snap1", 0, Camera(0)))
-		#myloop.add_task(ImageTask("Readdigs",0,"Snap1",IMT_readdigits,[150,78],[466,251]))
-		myexperiment.add_task(myloop)
 		self.experiment = myexperiment
 
 		self.frames = {}

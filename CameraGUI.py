@@ -3,6 +3,7 @@ import Tkinter as tk
 import tkSimpleDialog
 from SimpleCV import Camera
 from PIL import ImageTk
+from LabPalEngine import *
 
 def scan_cameras():
     existingcameras = []
