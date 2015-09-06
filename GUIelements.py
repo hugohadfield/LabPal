@@ -1,13 +1,16 @@
 
 import Tkinter as tk
 import tkSimpleDialog
-from TaskMaster import *
-from SimpleCV import Camera
+from LabPalEngine import *
 import sys
-from PIL import ImageTk
 
-TITLE_FONT = ("Helvetica", 22, "bold")
-BODY_FONT = ("Comic Sans", 14)
+from CameraGUI import *
+from GroupGUI import *
+from ScaleGUI import *
+
+
+TITLE_FONT = ("Calibri", 22, "bold")
+BODY_FONT = ("Calibri", 14)
 
 class VerticalScrolledFrame(tk.Frame):
     """A pure Tkinter scrollable frame that actually works!
@@ -70,17 +73,9 @@ class RemovableElement(tk.Frame):
 		self.destroy()
 
 
-
-
-
-
-
-
-
-
 def pack_loop_buttons(looptask,yesubframe):
 	buttonholder = tk.Frame(yesubframe)
-	btn1 = tk.Button(buttonholder, text='New...', command=lambda: runNewTaskMaker(looptask,yesubframe))
+	btn1 = tk.Button(buttonholder, text='New...', font=BODY_FONT, command=lambda: runNewTaskMaker(looptask,yesubframe))
 	btn1.pack(side = "right")
 	buttonholder.pack(side = "bottom")
 
@@ -108,80 +103,6 @@ def repack_loop(looptask,master):
 
 
 
-
-
-
-
-class LoopMakerDialog(tkSimpleDialog.Dialog):
-
-	def __init__(self, partask, *args,**kwargs):
-		self.partask = partask # create a local copy of parent task
-		self.finishedtask = None
-		tkSimpleDialog.Dialog.__init__(self, *args,**kwargs)
-
-	def body(self, master):
-
-		tk.Label(master, text="New Loop Name:").grid(row=0)
-		tk.Label(master, text="Repeats:").grid(row=1)
-
-		self.datavar = tk.StringVar(master)
-		self.datavar.set("Manually end loop")
-		repeatlist = ["1","10","100","1000","10000","100000"]
-
-		self.nameentry = tk.Entry(master)
-		self.dataentry = tk.OptionMenu(master, self.datavar, *repeatlist)
-
-		self.nameentry.grid(row=0, column=1)
-		self.dataentry.grid(row=1, column=1)
-		return self.nameentry # initial focus
-
-	def apply(self):
-		self.name = self.nameentry.get()
-		self.datasource = None
-		self.repeats = self.datavar.get()
-		if self.repeats == "Manually end loop":
-			self.finishedtask = Loop(self.name, 0, endcondition = "manual")
-		else: 
-			self.finishedtask = Loop(self.name, 0, None, "minimal", "repeat", int(self.repeats))
-
-
-
-class CameraMakerDialog(tkSimpleDialog.Dialog):
-
-	def __init__(self, partask, *args,**kwargs):
-		self.partask = partask # create a local copy of parent task
-		self.finishedtask = None
-		tkSimpleDialog.Dialog.__init__(self, *args,**kwargs)
-
-	def body(self, master):
-
-		tk.Label(master, text="New Snapshot Name:", font = BODY_FONT).grid(row=0)
-		tk.Label(master, text="Select Camera Number:", font = BODY_FONT).grid(row=1)
-
-		self.datavar = tk.IntVar(master)
-		camlist = scan_cameras()
-		if len(camlist) == 0:
-			pass # TODO something sensible
-		self.datavar.set(0)
-		repeatlist = camlist
-
-		self.nameentry = tk.Entry(master)
-		self.dataentry = tk.OptionMenu(master, self.datavar, *repeatlist)
-
-		self.nameentry.grid(row=0, column=1)
-		self.dataentry.grid(row=1, column=1)
-		button1 = tk.Button(self, text = "preview", font = BODY_FONT, command = self.preview)
-		button1.pack()
-		return self.nameentry # initial focus
-
-	def apply(self):
-		self.name = self.nameentry.get()
-		self.datasource = None
-		self.camnumb = self.datavar.get()
-		self.finishedtask = CameraSnapshot(self.name, 0, Camera(self.camnumb))
-
-	def preview(self):
-		LiveCameraDialog(Camera(self.datavar.get()),self)
 
 
 
@@ -280,81 +201,3 @@ def runNewTaskMaker(looptask, master):
 	if md.finishedtask is not None:
 		looptask.tasks.append(md.finishedtask)
 		repack_loop(looptask,master)
-
-
-
-
-
-
-
-class ImageTaskMakerDialog(tkSimpleDialog.Dialog):
-
-	def __init__(self, partask, *args,**kwargs):
-		self.partask = partask # create a local copy of parent task
-		self.finishedtask = None
-		tkSimpleDialog.Dialog.__init__(self, *args,**kwargs)
-
-	def body(self, master):
-
-		namesinscope = self.partask.list_imageout()
-		tk.Label(master, text="New task name:").grid(row=0)
-		tk.Label(master, text="New task function:").grid(row=1)
-		tk.Label(master, text="Get data from:").grid(row=2)
-
-		self.datavar = tk.StringVar(master)
-		self.datavar.set(namesinscope[0])
-
-		self.nameentry = tk.Entry(master)
-		self.dataentry = tk.OptionMenu(master, self.datavar, *namesinscope)
-
-		self.nameentry.grid(row=0, column=1)
-		self.dataentry.grid(row=2, column=1)
-		return self.nameentry # initial focus
-
-	def apply(self):
-		self.name = self.nameentry.get()
-		self.datasource = self.datavar.get()
-		self.finishedtask = ImageTask(self.name, 0, self.datasource, IMT_sumbox, [0,0],[100,100])
-
-
-
-
-
-
-def pack_cam_image(master, parentdialog):
-	for s in master.pack_slaves():
-		s.destroy()
-	camim = parentdialog.camera.getImage()
-	sf = 300/float(camim.height)
-	photo = ImageTk.PhotoImage(camim.scale(sf).getPIL()) 
-	label = tk.Label(master, image=photo) 
-	label.camim = photo # keep a reference! 
-	label.pack() #show the image
-	timerid = master.after(100, lambda:pack_cam_image(master, parentdialog) )
-
-class LiveCameraDialog(tkSimpleDialog.Dialog):
-
-	def __init__(self, camera, *args,**kwargs):
-		self.camera = camera
-		tkSimpleDialog.Dialog.__init__(self, *args,**kwargs)
-
-	def body(self, master):
-		contframe = tk.Frame(self)
-		
-		timerid = self.after(100, lambda:pack_cam_image(contframe, self) )
-
-		contframe.pack(fill = "both")
-
-	def buttonbox(self):
-		box = tk.Frame(self)
-		w = tk.Button(box, text="Cancel", font = BODY_FONT, width=10, command=self.cancel)
-		w.pack(padx=5, pady=5)
-		self.bind("<Escape>", self.cancel)
-		box.pack()
-
-
-
-
-if __name__ == "__main__":
-	root = tk.Tk()
-	LiveCameraDialog(Camera(0),root)

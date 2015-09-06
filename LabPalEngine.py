@@ -74,6 +74,7 @@ def scan_cameras():
     for i in range(0,10):
         try:
             camera = Camera(i)
+            camera.getImage().erode()
             existingcameras.append(i)
         except:
             pass
@@ -139,6 +140,8 @@ class Loop(Task):
         self.data = defaultdict(list)
         if endcondition == "repeat":
             self.repeats = args[0]
+        elif endcondition == "timeout":
+            self.timeout = args[0]
     def add_task(self, task):
         self.tasks.append(task)
     def delete_task(self, task):
@@ -152,6 +155,8 @@ class Loop(Task):
     def get_duration(self):
         if self.endcondition == "repeat":
             return self.repeats * self.calc_task_duration()
+        elif self.endcondition == "timeout":
+            return self.timeout
     duration = property(get_duration)
 
     def list_numeric(self):
@@ -235,10 +240,34 @@ class Loop(Task):
             while 1:
                 if not self.execloop():
                     break
-        if self.looptime == "minimal" and self.endcondition == "repeat":
-            for i in range(0,self.repeats):
+        elif self.looptime == "minimal" and self.endcondition == "repeat":
+            for i in range(0,self.repeats+2):
                 if not self.execloop():
                     break
+        elif self.looptime == "minimal" and self.endcondition == "timeout":
+            t1 = time.time()
+            while time.time() - t1 < self.timeout:
+                if not self.execloop():
+                    break
+
+        elif self.looptime != "minimal" and self.endcondition == "repeat":
+            for i in range(0,self.repeats+2):
+                retdat = run_for(self.execloop, self.looptime)
+                if not retdat[0]:
+                    break
+        elif self.looptime != "minimal" and self.endcondition == "manual":
+            while 1:
+                retdat = run_for(self.execloop, self.looptime)
+                if not retdat[0]:
+                    break
+        elif self.looptime != "minimal" and self.endcondition == "timeout":
+            t1 = time.time()
+            while time.time() - t1 < self.timeout:
+                retdat = run_for(self.execloop, self.looptime)
+                if not retdat[0]:
+                    break
+
+
         print "Exiting " + self.name
         self.fileobj.close()
         return

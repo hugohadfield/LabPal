@@ -1,11 +1,11 @@
 import Tkinter as tk
-from TaskMaster import *
+from LabPalEngine import *
 from SimpleCV import Camera
 import sys
 from GUIelements import *
 
-TITLE_FONT = ("Helvetica", 22, "bold")
-BODY_FONT = ("Comic Sans", 14)
+TITLE_FONT = ("Calibri", 22, "bold")
+BODY_FONT = ("Calibri", 14)
 
 
 class StdoutRedirector(object):
