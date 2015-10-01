@@ -21,6 +21,8 @@ def copyDirectory(src, dest):
         print('Directory not copied. Error: %s' % e)
 
 def transfer_data(dirname):
+	os.system("sudo umount /media/usb")
+	tkMessageBox.showinfo("Transfer data","Insert USB stick, then press OK")
 	if os.path.ismount(dirname):
 		thedir = os.path.dirname(os.path.realpath(__file__))
 		mydirecs = [ name for name in os.listdir(thedir) if os.path.isdir(os.path.join(thedir, name)) ]
@@ -96,7 +98,7 @@ class MenuPage(tk.Frame):
         button2.pack(fill="x", padx=20)
 
         button3 = tk.Button(self, text="Transfer data",
-                            command=lambda: transfer_data("/home/pi/media/usb"),
+                            command=lambda: transfer_data("/media/usb/"),
                             font=BODY_FONT)
         button3.pack(fill="x", padx=20)
 
