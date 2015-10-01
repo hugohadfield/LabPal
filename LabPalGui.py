@@ -96,7 +96,7 @@ class MenuPage(tk.Frame):
         button2.pack(fill="x", padx=20)
 
         button3 = tk.Button(self, text="Transfer data",
-                            command=lambda: transfer_data("F:/"),
+                            command=lambda: transfer_data("/home/pi/media/usb"),
                             font=BODY_FONT)
         button3.pack(fill="x", padx=20)
 
