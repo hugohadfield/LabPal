@@ -16,7 +16,7 @@ class LoopRepeatDialog(templateDialog):
 		tk.Label(master, text="Number of repeats:", font=BODY_FONT).grid(row=0)
 		tk.Label(master, text="Repeat frequency (Hz):", font=BODY_FONT).grid(row=1)
 
-		self.numberentry = tk.Entry(master)
+		self.numberentry = tk.Entry(master,font=BODY_FONT)
 		self.numberentry.insert(0, "5")
 		self.frequencyentry = tk.Entry(master)
 		self.frequencyentry.insert(0, "10")

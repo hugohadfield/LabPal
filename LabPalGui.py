@@ -2,10 +2,37 @@ import Tkinter as tk
 from LabPalEngine import *
 from SimpleCV import Camera
 import sys
+import os
 from GUIelements import *
+import shutil
+import tkMessageBox
 
 TITLE_FONT = ("Calibri", 22, "bold")
 BODY_FONT = ("Calibri", 14)
+
+def copyDirectory(src, dest):
+    try:
+        shutil.copytree(src, dest)
+    # Directories are the same
+    except shutil.Error as e:
+        print('Directory not copied. Error: %s' % e)
+    # Any error saying that the directory doesn't exist
+    except OSError as e:
+        print('Directory not copied. Error: %s' % e)
+
+def transfer_data(dirname):
+	if os.path.ismount(dirname):
+		thedir = os.path.dirname(os.path.realpath(__file__))
+		mydirecs = [ name for name in os.listdir(thedir) if os.path.isdir(os.path.join(thedir, name)) ]
+		n = 0
+		for mydir in mydirecs:
+			if mydir != '.git':
+				copyDirectory(mydir,dirname + mydir)
+				shutil.rmtree(mydir)
+				n = n + 1
+		tkMessageBox.showinfo("Transfer data","Transfered (%d)" % n)
+	else:
+		tkMessageBox.showerror("Transfer data","Cannot find USB stick")
 
 
 class StdoutRedirector(object):
@@ -69,7 +96,7 @@ class MenuPage(tk.Frame):
         button2.pack(fill="x", padx=20)
 
         button3 = tk.Button(self, text="Transfer data",
-                            command=lambda: controller.show_frame(EditExperiment),
+                            command=lambda: transfer_data("F:/"),
                             font=BODY_FONT)
         button3.pack(fill="x", padx=20)
 
