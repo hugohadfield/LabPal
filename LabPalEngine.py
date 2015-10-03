@@ -100,7 +100,6 @@ def IMT_readdigits(imin, *args):
     imslice.show()
     imslice.save("temp.jpg")
     digits = imagefiletostring("temp.jpg")
-    print digits
     return digits
 
 def IMT_smooth(imin, *args):

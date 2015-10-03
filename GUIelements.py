@@ -7,7 +7,7 @@ import sys
 from CameraGUI import *
 from GroupGUI import *
 from ScaleGUI import *
-
+from ScreenGUI import *
 
 TITLE_FONT = ("Calibri", 22, "bold")
 BODY_FONT = ("Calibri", 14)
@@ -167,7 +167,7 @@ class NewTaskDialog(tkSimpleDialog.Dialog):
 
 	def MakeScreenReader(self):
 		self.parent.focus_set()
-		md = LoopMakerDialog(self.partask,self.master)
+		md = ReadScreenDialog(self.partask,self.master)
 		self.finishedtask = md.finishedtask
 		self.cancel()
 
