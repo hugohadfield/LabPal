@@ -21,7 +21,7 @@ def copyDirectory(src, dest):
         print('Directory not copied. Error: %s' % e)
 
 def transfer_data(dirname):
-	os.system("sudo umount /media/usb")
+	#os.system("sudo umount /media/usb")
 	tkMessageBox.showinfo("Transfer data","Insert USB stick, then press OK")
 	if os.path.ismount(dirname):
 		thedir = os.path.dirname(os.path.realpath(__file__))
