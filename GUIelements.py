@@ -8,6 +8,7 @@ from CameraGUI import *
 from GroupGUI import *
 from ScaleGUI import *
 from ScreenGUI import *
+from UserPromptGUI import *
 
 TITLE_FONT = ("Calibri", 22, "bold")
 BODY_FONT = ("Calibri", 14)
@@ -121,11 +122,11 @@ class NewTaskDialog(tkSimpleDialog.Dialog):
 		vsf = VerticalScrolledFrame(contframe)
 		buttons = [ tk.Button(vsf.interior, text='Group', font=BODY_FONT, command=self.MakeLoop),
 					tk.Button(vsf.interior, text='Camera Snapshot', font=BODY_FONT, command=self.MakeCamera),
-					tk.Button(vsf.interior, text='Marker Tracker', font=BODY_FONT, command=self.MakeMarkerTracker),
+					tk.Button(vsf.interior, text='User Prompt', font=BODY_FONT, command=self.MakeUserPrompt),
 					tk.Button(vsf.interior, text='Read Screen', font=BODY_FONT, command=self.MakeScreenReader),
 					tk.Button(vsf.interior, text='Read Scale', font=BODY_FONT, command=self.MakeScaleReader),
+					tk.Button(vsf.interior, text='Marker Tracker', font=BODY_FONT, command=self.MakeMarkerTracker),
 					tk.Button(vsf.interior, text='Read Arduino Temperature', font=BODY_FONT, command=self.MakeArduinoReader),
-					tk.Button(vsf.interior, text='User Prompt', font=BODY_FONT, command=self.MakeUserPrompt),
 					tk.Button(vsf.interior, text='User Input', font=BODY_FONT, command=self.MakeUserInput) ]
 		for but in buttons:
 			but.pack(fill = "x", padx = 10, pady = 2)
@@ -185,7 +186,7 @@ class NewTaskDialog(tkSimpleDialog.Dialog):
 
 	def MakeUserPrompt(self):
 		self.parent.focus_set()
-		md = LoopMakerDialog(self.partask,self.master)
+		md = UserPromptDialog(self.partask,self.master)
 		self.finishedtask = md.finishedtask
 		self.cancel()
 

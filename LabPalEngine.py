@@ -129,6 +129,19 @@ class ImageTask(Task):
     def run(self, image):
         return run_for(self.func, self.duration, image, *self.args)
     
+class UserPromptTask(Task):
+    def __init__(self, name, starttime, provider_task = None, *args):
+        Task.__init__(self, name, starttime, provider_task)
+        self.duration = args[1]
+        self.message = args[0]
+    def run(self):
+        print "#############  "+ self.message +"  #############"
+        for tstep in range(0,self.duration):
+            print str(self.duration - tstep) + " seconds"
+            time.sleep(1)
+        print "###################################"
+        return
+
 class Loop(Task):
     def __init__(self, name, starttime, provider_task = None, looptime = "minimal", endcondition = "manual", *args):
         Task.__init__(self, name, starttime, provider_task)
