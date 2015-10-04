@@ -138,11 +138,11 @@ class UserPromptTask(Task):
         print "#############  "+ self.message +"  #############"
         for tstep in range(0,self.duration):
             print str(self.duration - tstep) + " seconds"
-            time.sleep(1)
-            if checkforexit():
-                break
+            for i in range(0,4):
+                if checkforexit():
+                    return
+                time.sleep(0.25)
         print "###################################"
-        return
 
 class Loop(Task):
     def __init__(self, name, starttime, provider_task = None, looptime = "minimal", endcondition = "manual", *args):
