@@ -2,12 +2,12 @@ from subprocess import Popen, PIPE
 import os
 
 def imagefiletostring(imagefile, *args):
-	argstring = " -t20 -d-1 -i3 remove_isolated " + imagefile
+	argstring = " -t50 -d-1 -i3 remove_isolated " + imagefile
 	comstring = "ssocr.exe" + argstring
 	p = Popen(comstring, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 	output, err = p.communicate(b"input data that is passed to subprocess' stdin")
 	rc = p.returncode
-	return output
+	return output.strip()
 
 def imagefiletofloat(imagefile, *args):
 	strout = imagefiletostring(imagefile, args)

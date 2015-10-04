@@ -38,6 +38,7 @@ class ReadScreenDialog(templateDialog):
 
 
 	def apply(self):
+		self.name = self.nameentry.get()
 		snapname = self.datavar.get()
 		for t in self.partask.tasks:
 			if t.name == snapname:
@@ -62,11 +63,10 @@ class ReadScreenDialog(templateDialog):
 					ymin = p1[1]
 					ymax = p2[1]
 
+				rd = DemoReadDialog([xmin,ymin], [xmax,ymax], mycam, self)
+				if rd.finishedtask is not None:
+					self.finishedtask = ImageTask(self.name, 0, snapname , IMT_readdigits, [xmin,ymin],[xmax,ymax])
 
-def npboost(imin):
-    baseline = (imin.real.astype(float) - np.min(imin))
-    boosted = 255 * baseline/np.max(baseline)
-    return boosted
 
 class ScreenSelectDialog(templateDialog):
 
@@ -89,17 +89,17 @@ class ScreenSelectDialog(templateDialog):
 		contframe.pack(fill = "both")
 
 	def onmouse(self, event):
-		self.point = [event.x, event.y]
+		self.point = [event.x/self.sf, event.y/self.sf]
 
 	def pack_cam_image(self, master):
 		for s in master.pack_slaves():
 			s.destroy()
 		camim = self.camera.getImage()
-		sf = 300/float(camim.height)
-		camscale = camim.scale(sf)
+		self.sf = 300/float(camim.height)
+		camscale = camim.scale(self.sf)
 		if self.point is not None:
 			circlelayer = DrawingLayer((camscale.width, camscale.height))
-			circlelayer.circle(self.point, 5)
+			circlelayer.circle([self.point[0]*self.sf,self.point[1]*self.sf], 5, color = (255,0,0))
 			camscale.addDrawingLayer(circlelayer)
 			camscale = camscale.applyLayers()
 		photo = ImageTk.PhotoImage(camscale.getPIL()) 
@@ -107,44 +107,45 @@ class ScreenSelectDialog(templateDialog):
 		label.camim = photo # keep a reference! 
 		label.pack() #show the image
 		label.bind('<Button-1>', self.onmouse)
-		timerid = master.after(100, lambda:self.pack_cam_image(master) )
+		timerid = master.after(200, lambda:self.pack_cam_image(master) )
 
 
 class DemoReadDialog(templateDialog):
 
 	def __init__(self, point1, point2, camera, *args,**kwargs):
+		self.finishedtask = None
+		self.point1 = point1
+		self.point2 = point2
 		self.camera = camera
 		tkSimpleDialog.Dialog.__init__(self, *args,**kwargs)
 
 	def body(self, master):
 		contframe = tk.Frame(self)
 
-		camframe = tk.Frame(contframe)
-		timerid = self.after(100, lambda:self.pack_cam_image(camframe) )
-		camframe.pack(fill = "both")
+		self.message = tk.Label(contframe, text="hello", font=BODY_FONT)
+		self.message.pack(side = "bottom")
 
-		message = tk.Label(contframe, text=self.message, font=BODY_FONT)
-		message.pack(side = "bottom")
+		camframe = tk.Frame(contframe)
+		timerid = self.after(200, lambda:self.pack_cam_image(camframe) )
+		camframe.pack(fill = "both")
 
 		contframe.pack(fill = "both")
 
-	def onmouse(self, event):
-		self.point = [event.x, event.y]
+	def apply(self):
+		self.finishedtask = 1
+
 
 	def pack_cam_image(self, master):
 		for s in master.pack_slaves():
 			s.destroy()
 		camim = self.camera.getImage()
+		camim = camim.regionSelect(self.point1[0], self.point1[1], self.point2[0], self.point2[1])
 		sf = 300/float(camim.height)
 		camscale = camim.scale(sf)
-		if self.point is not None:
-			circlelayer = DrawingLayer((camscale.width, camscale.height))
-			circlelayer.circle(self.point, 5)
-			camscale.addDrawingLayer(circlelayer)
-			camscale = camscale.applyLayers()
 		photo = ImageTk.PhotoImage(camscale.getPIL()) 
 		label = tk.Label(master, image=photo) 
 		label.camim = photo # keep a reference! 
 		label.pack() #show the image
-		label.bind('<Button-1>', self.onmouse)
-		timerid = master.after(100, lambda:self.pack_cam_image(master) )
+		digs = IMT_readdigits(camscale,[0,0],[camscale.width,camscale.height])
+		self.message["text"] = digs
+		timerid = master.after(200, lambda:self.pack_cam_image(master) )

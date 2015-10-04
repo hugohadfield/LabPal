@@ -97,7 +97,6 @@ def IMT_readdigits(imin, *args):
     imslice = imin.regionSelect(xmin, ymin, xmax, ymax)
     sf = 150/float(imslice.height)
     imslice = simplecvboost(imslice.scale(sf).grayscale())
-    imslice.show()
     imslice.save("temp.jpg")
     digits = imagefiletostring("temp.jpg")
     return digits
