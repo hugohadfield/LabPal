@@ -139,6 +139,8 @@ class UserPromptTask(Task):
         for tstep in range(0,self.duration):
             print str(self.duration - tstep) + " seconds"
             time.sleep(1)
+            if checkforexit():
+                break
         print "###################################"
         return
 
