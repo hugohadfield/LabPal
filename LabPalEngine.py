@@ -104,6 +104,45 @@ def IMT_readdigits(imin, *args):
 def IMT_smooth(imin, *args):
     return imin.smooth( aperature = args[0])
 
+def IMT_readscale(imin, *args):
+    xmin = args[0][0]
+    xmax = args[1][0]
+    ymin = args[0][1]
+    ymax = args[1][1]
+    markercolor = args[2]
+    imslice = imin.regionSelect(xmin, ymin, xmax, ymax)
+    sf = 150/float(imslice.height)
+    imslice = simplecvboost(imslice.scale(sf).grayscale())
+    imslice.save("temp.jpg")
+    digits = imagefiletostring("temp.jpg")
+    return digits
+
+def IMT_calccentroid(imin, *args):
+    immod = np.squeeze(np.dsplit( imin.getNumpy().astype(float), 3)[0] )/255
+
+    xvals = np.arange(0,imin.width)
+    xstack = np.transpose( np.tile( xvals, (imin.height,1) ) )
+    xmoments = np.multiply(xstack, immod).flatten()
+    xbar = np.sum(xmoments)/np.sum(immod)
+
+    yvals = np.arange(0,imin.height)
+    ystack = np.tile( yvals, (imin.width,1) )
+    ymoments = np.multiply(ystack, immod).flatten()
+    ybar = np.sum(ymoments)/np.sum(immod)
+    return [xbar,ybar]
+
+def cartdist(p1,p2):
+    return math.sqrt( (p1[0] - p2[0])*(p1[0] - p2[0]) + (p1[1] - p2[1])*(p1[1] - p2[1]))
+
+def IMT_find_col(imin, col):
+    # This is the color distance from the reference point
+    coldist = imin.colorDistance( col )
+    lolout = Image( npboost(  np.squeeze(np.dsplit( coldist.getNumpy(), 3)[0] )  ) )
+    modim = lolout.stretch(0,20)
+    openim = m_open(modim,1).binarize()
+    return IMT_calccentroid(openim)
+
+
 class Task:
     def __init__(self, name, starttime, provider_task):
         self.name = name

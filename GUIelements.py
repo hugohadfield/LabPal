@@ -174,7 +174,7 @@ class NewTaskDialog(tkSimpleDialog.Dialog):
 
 	def MakeScaleReader(self):
 		self.parent.focus_set()
-		md = LoopMakerDialog(self.partask,self.master)
+		md = ReadScaleDialog(self.partask,self.master)
 		self.finishedtask = md.finishedtask
 		self.cancel()
 

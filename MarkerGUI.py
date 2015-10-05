@@ -5,31 +5,10 @@ import math
 from SimpleCV import Camera, Image
 import numpy as np
 from PIL import ImageTk
+from LabPalEngine import *
 
 BODY_FONT = ("Comic Sans", 14)
 
-def npboost(imin):
-    baseline = (imin.real.astype(float) - np.min(imin))
-    boosted = 255 * baseline/np.max(baseline)
-    return boosted
-
-def cartdist(p1,p2):
-	return math.sqrt( (p1[0] - p2[0])*(p1[0] - p2[0]) + (p1[1] - p2[1])*(p1[1] - p2[1]))
-
-def marker_blob(imin, p):
-	xvals = np.arange(0,imin.width)
-	xsqr = np.square( (xvals - p[0]) )
-	yvals = np.arange(0,imin.height)
-	ysqr = np.square( (yvals - p[1]) )
-
-	fullxsqr = np.transpose( np.tile( xsqr, (imin.height,1) ) )
-	fullysqr = np.tile( ysqr, (imin.width,1) )  
-	dist = npboost( np.sqrt(fullysqr + fullxsqr) )
-	coldist = imin.colorDistance( imin[p] )
-
-	lolout = Image( npboost(   dist + np.squeeze(np.dsplit( coldist.getNumpy(), 3)[0] )  ) )
-	blobs = lolout.stretch(0,20).invert().findBlobs()
-	lolout.stretch(0,20).invert().show()
 
 class MarkerSelectDialog(tkSimpleDialog.Dialog):
 
@@ -68,21 +47,26 @@ class MarkerSelectDialog(tkSimpleDialog.Dialog):
 		camim = self.camera.getImage()
 		sf = 300/float(camim.height)
 		newim = camim.scale(sf)
-		marker_blob(newim, self.point)
+		self.marker_blob(newim, self.point)
 
 	def pack_cam_image(self, master):
 		for s in master.pack_slaves():
 			s.destroy()
 		camim = self.camera.getImage()
 		sf = 300/float(camim.height)
-		photo = ImageTk.PhotoImage(camim.scale(sf).getPIL()) 
+		newim = camim.scale(sf)
+		photo = ImageTk.PhotoImage(newim.getPIL()) 
 		label = tk.Label(master, image=photo) 
 		label.camim = photo # keep a reference! 
 		label.pack() #show the image
 		label.bind('<Button-1>', self.onmouse)
+		if self.markercolor is not None:
+			IMT_find_col(newim, self.markercolor)
 		timerid = master.after(100, lambda:self.pack_cam_image(master) )
 
+	def marker_blob(self, imin, p):
+		self.markercolor = imin[p]
 
 if __name__ == "__main__":
 	root = tk.Tk()
-	MarkerSelectDialog("Select a colored marker fixed to the scale", Camera(0), root)
+	MarkerSelectDialog("Select a colored marker fixed to the scale", Camera(1), root)
