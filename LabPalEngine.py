@@ -106,16 +106,41 @@ def IMT_smooth(imin, *args):
 
 def IMT_readscale(imin, *args):
     xmin = args[0][0]
-    xmax = args[1][0]
     ymin = args[0][1]
+
     ymax = args[1][1]
-    markercolor = args[2]
-    imslice = imin.regionSelect(xmin, ymin, xmax, ymax)
-    sf = 150/float(imslice.height)
-    imslice = simplecvboost(imslice.scale(sf).grayscale())
-    imslice.save("temp.jpg")
-    digits = imagefiletostring("temp.jpg")
-    return digits
+    xmax = args[1][0]
+
+    fc = args[2]
+    mc = args[3]
+    minpos = args[4]
+    deltaval = args[5]
+    minval = args[6]
+    deltapos = args[7]
+    
+    imin = imin.regionSelect(xmin, ymin, xmax, ymax)
+    sf = 300/float(imin.height)
+    newim = imin.scale(sf)
+    
+    # Find the fixed marker
+    p1 = IMT_find_col(newim, fc)
+    
+    # Find the moving marker
+    p2 = IMT_find_col(newim, mc)
+    
+    # Make them relative to each other
+    xpos = p2[0] - p1[0]
+    currentval = minval + deltaval*(xpos - minpos)/(deltapos)
+    print currentval
+    return currentval
+
+def IMT_find_col(imin, col):
+    # This is the color distance from the reference point
+    coldist = imin.colorDistance( col )
+    lolout = Image( npboost(  np.squeeze(np.dsplit( coldist.getNumpy(), 3)[0] )  ) )
+    modim = lolout.stretch(0,20)
+    openim = m_open(modim,1).binarize()
+    return IMT_calccentroid(openim)
 
 def IMT_calccentroid(imin, *args):
     immod = np.squeeze(np.dsplit( imin.getNumpy().astype(float), 3)[0] )/255
@@ -134,13 +159,6 @@ def IMT_calccentroid(imin, *args):
 def cartdist(p1,p2):
     return math.sqrt( (p1[0] - p2[0])*(p1[0] - p2[0]) + (p1[1] - p2[1])*(p1[1] - p2[1]))
 
-def IMT_find_col(imin, col):
-    # This is the color distance from the reference point
-    coldist = imin.colorDistance( col )
-    lolout = Image( npboost(  np.squeeze(np.dsplit( coldist.getNumpy(), 3)[0] )  ) )
-    modim = lolout.stretch(0,20)
-    openim = m_open(modim,1).binarize()
-    return IMT_calccentroid(openim)
 
 
 class Task:

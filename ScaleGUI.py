@@ -64,10 +64,61 @@ class ReadScaleDialog(templateDialog):
 					ymin = p1[1]
 					ymax = p2[1]
 
-				fs = MarkerSelectDialog([xmin,ymin], [xmax,ymax], "Select point fixed to rig", mycam, self)
-				if rd.endcolor is not None:
-					ms = MarkerSelectDialog([xmin,ymin], [xmax,ymax], "Select moving marker", mycam, self)
+				fc = MarkerSelectDialog([xmin,ymin], [xmax,ymax], "Select point fixed to rig", mycam, self)
+				if fc.endcolor is not None:
+					fixedcol = fc.endcolor
+					mc = MarkerSelectDialog([xmin,ymin], [xmax,ymax], "Select moving marker", mycam, self)
+					if mc.endcolor is not None:
+						movingcol = mc.endcolor
+						sc1 = ScaleCalibrateDialog(fixedcol,movingcol,mycam,"Move scale to minimum and enter value","0",[xmin,ymin],[xmax,ymax],self)
+						if sc1.value is not None:
+							self.minval = float(sc1.value)
+							self.minpos = float(sc1.position[0])
+							sc2 = ScaleCalibrateDialog(fixedcol,movingcol,mycam,"Move scale to maximum and enter value","20",[xmin,ymin],[xmax,ymax],self)
+							if sc2.value is not None:
+								maxval = float(sc2.value)
+								self.deltaval = maxval - self.minval
+								self.maxpos = float(sc2.position[0])
+								self.deltapos = self.maxpos - self.minpos
+								self.finishedtask = ImageTask(self.name, 0, snapname , IMT_readscale,[xmin,ymin],[xmax,ymax],fixedcol,movingcol,self.minpos,self.deltaval, self.minval, self.deltapos)
 
+class ScaleCalibrateDialog(templateDialog):
+	def __init__(self, fixedcol, movecol, cam, message, defaultval, point1,point2, *args,**kwargs):
+		self.finishedtask = None
+		self.message = message
+		self.camera = cam
+		self.fixedcol = fixedcol
+		self.movecol = movecol
+		self.defaultval = defaultval
+		self.point1 = point1
+		self.point2 = point2
+		tkSimpleDialog.Dialog.__init__(self, *args,**kwargs)
+
+	def body(self, master):
+
+		tk.Label(master, text=self.message).grid(row=0)
+		tk.Label(master, text="Value:").grid(row=2)
+
+		self.valueentry = tk.Entry(master)
+		self.valueentry.insert(0, self.defaultval)
+		self.valueentry.grid(row=2, column=1)
+
+		return self.valueentry # initial focus
+
+	def apply(self):
+		self.value = self.valueentry.get()
+		camim = self.camera.getImage()
+		camim = camim.regionSelect(self.point1[0], self.point1[1], self.point2[0], self.point2[1])
+		self.sf = 300/float(camim.height)
+		newim = camim.scale(self.sf)
+		# Find the fixed marker
+		p1 = IMT_find_col(newim, self.fixedcol)
+		# Find the moving marker
+		p2 = IMT_find_col(newim, self.movecol)
+		# Make them relative to each other
+		dx = p2[0] - p1[0]
+		dy = p2[1] - p1[1]
+		self.position = [dx,dy]
 
 
 class MarkerSelectDialog(templateDialog):
@@ -125,7 +176,6 @@ class MarkerSelectDialog(templateDialog):
 			self.centroid = IMT_find_col(newim, self.markercolor)
 			circlelayer = DrawingLayer((newim.width, newim.height))
 			circlelayer.circle([self.centroid[0],self.centroid[1]], 5, color = (255,0,0))
-			print self.centroid
 			newim.addDrawingLayer(circlelayer)
 			newim = newim.applyLayers()
 
