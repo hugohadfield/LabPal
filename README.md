@@ -5,3 +5,6 @@ A drag and drop interface alows for easy setup of experiments and video processi
 
 Requirements:
 SimpleCV
+
+Getting started:
+python LabPalGui.py
